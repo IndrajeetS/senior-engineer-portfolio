@@ -1,8 +1,5 @@
 import SocialLinks from "@/components/layout/SocialLinks";
 import { Button } from "@/components/ui/button";
-import { useGetInfo } from "@/features/portfolio/api/portfolio.api";
-import { motion, type Variants } from "framer-motion";
-import { ArrowRight, Download, FileText, MapPin, X } from "lucide-react";
 import {
   Dialog,
   DialogClose,
@@ -11,6 +8,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { useGetInfo } from "@/features/portfolio/api/portfolio.api";
+import { motion, type Variants } from "framer-motion";
+import { ArrowRight, Download, FileText, MapPin, X } from "lucide-react";
 
 export default function Hero() {
   // Fetch dynamic info datasets live from the backend API
@@ -84,13 +84,13 @@ export default function Hero() {
   return (
     <section
       id="hero"
-      className="min-h-screen flex items-center relative overflow-hidden pt-0"
+      className="min-h-screen flex items-center relative overflow-hidden pt-0 xl:min-h-[800px]"
     >
       <div className="container mx-auto px-4 md:px-8 z-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           {/* Metadata content area */}
           <motion.div
-            className="flex flex-col gap-6"
+            className="flex flex-col gap-6 order-2 lg:order-1"
             variants={containerVariants}
             initial="hidden"
             animate="visible"
@@ -185,7 +185,7 @@ export default function Hero() {
 
             <motion.div
               variants={itemVariants}
-              className="flex items-center gap-4 mt-8"
+              className="flex items-center gap-4 mt-8 mb-8"
             >
               <SocialLinks links={hardcodedSocialLinks} variant="icon" />
             </motion.div>
@@ -193,12 +193,12 @@ export default function Hero() {
 
           {/* Cloudinary Hosted Profile Image Card */}
           <motion.div
-            className="flex justify-center lg:justify-end"
+            className="flex justify-center lg:justify-end order-1 lg:order-2"
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.7, ease: "easeOut", delay: 0.2 }}
           >
-            <div className="relative w-72 h-72 md:w-96 md:h-96">
+            <div className="relative w-52 h-52 md:w-96 md:h-96">
               <div className="absolute inset-0 border-2 border-primary rounded-2xl rotate-6 transition-transform hover:rotate-12 duration-500" />
               <div className="absolute inset-0 bg-card rounded-2xl overflow-hidden -rotate-6 transition-transform hover:rotate-0 duration-500 border border-border">
                 {info.image && (

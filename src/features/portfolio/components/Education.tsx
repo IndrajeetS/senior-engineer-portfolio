@@ -1,6 +1,6 @@
+import { Card, CardContent } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { Award, Calendar, GraduationCap } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
 
 // Hardcoded data from resume records
 const educationList = [
@@ -10,10 +10,10 @@ const educationList = [
     field: "Computer Science",
     institution: "Vel Tech University",
     location: "Chennai",
-    startYear: "2015", // Adjust years based on your actual timeline
-    endYear: "2019",
+    startYear: "2012",
+    endYear: "2016",
     current: false,
-    gpa: "N/A", // Add your GPA here if needed
+    gpa: "N/A",
     achievements: [
       "Specialized in Software Engineering and Mobile Development",
       "Participated in various technical symposiums and hackathons",

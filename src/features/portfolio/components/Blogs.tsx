@@ -1,8 +1,8 @@
+import { Skeleton } from "@/components/ui/skeleton";
 import { motion } from "framer-motion";
 import { ArrowRight, BookOpen, Calendar } from "lucide-react";
 import { useLocation } from "wouter"; // Fixed: Swapped react-router-dom hook out for wouter
 import { useListBlogs } from "../api/portfolio.api";
-import { Skeleton } from "@/components/ui/skeleton";
 
 function stripDeltaJson(deltaStr: string): string {
   try {
@@ -46,6 +46,10 @@ export default function Blogs() {
     blogsResponse && "data" in blogsResponse
       ? (blogsResponse as any).data
       : blogsResponse || [];
+
+  if (blogs.length === 0) {
+    return null;
+  }
 
   return (
     <section

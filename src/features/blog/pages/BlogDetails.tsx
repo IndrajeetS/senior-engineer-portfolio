@@ -1,9 +1,10 @@
-import DeltaRenderer from "../components/DeltaRenderer";
 import Layout from "@/components/layout/Layout";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useGetBlog } from "@/features/portfolio/api/portfolio.api";
 import { ArrowLeft, Calendar, Clock } from "lucide-react";
 import { useLocation, useRoute } from "wouter";
+import DeltaRenderer from "../components/DeltaRenderer";
+import NotFound from "@/features/portfolio/pages/not-found";
 
 export default function BlogDetail() {
   const [match, params] = useRoute<{ id: string }>("/blog/:id");
@@ -15,11 +16,16 @@ export default function BlogDetail() {
 
   const formattedDate = blog
     ? new Date(blog.createdAt).toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      })
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    })
     : "";
+
+  // 🛡️ Bypasses the details wrapper and renders the full creative 404 terminal page
+  if (!isLoading && (isError || !blog)) {
+    return <NotFound />;
+  }
 
   return (
     <Layout>
@@ -30,18 +36,6 @@ export default function BlogDetail() {
             <Skeleton className="h-12 w-full mb-4" />
             <Skeleton className="h-6 w-48 mb-8" />
             <Skeleton className="h-[360px] w-full rounded-2xl" />
-          </div>
-        ) : isError || !blog ? (
-          <div className="flex flex-col items-center justify-center min-h-[40vh]">
-            <h2 className="text-xl font-mono font-bold mb-4">
-              Article Not Found
-            </h2>
-            <button
-              onClick={() => setLocation("/")}
-              className="text-primary hover:underline font-mono text-sm"
-            >
-              RETURN HOME
-            </button>
           </div>
         ) : (
           <>
@@ -59,6 +53,18 @@ export default function BlogDetail() {
                   {blog.title}
                 </h1>
                 <div className="flex flex-wrap items-center gap-6 text-sm font-mono text-muted-foreground border-b border-border/40 pb-6">
+                  {/* Neumorphic / Soft UI Styled Thumbnail Wrap */}
+                  {blog.thumbnail && (
+                    <div className="relative w-12 h-12 rounded-xl overflow-hidden bg-muted/40 border border-border/50 shadow-inner flex shrink-0 items-center justify-center">
+                      {/* <div className="w-full h-full rounded-xl overflow-hidden border border-border/20 shadow-md"> */}
+                      <img
+                        src={blog.thumbnail}
+                        alt=""
+                        className="w-full h-full object-cover object-center p-1"
+                      />
+                      {/* </div> */}
+                    </div>
+                  )}
                   <div className="flex items-center gap-2">
                     <Calendar className="w-4 h-4 text-primary" />
                     <span>{formattedDate}</span>
@@ -69,19 +75,6 @@ export default function BlogDetail() {
                   </div>
                 </div>
               </header>
-
-              {/* Neumorphic / Soft UI Styled Thumbnail Wrap */}
-              {blog.thumbnail && (
-                <div className="relative w-full max-h-[380px] rounded-2xl overflow-hidden bg-muted/40 border border-border/50 shadow-inner p-2 mb-10 flex items-center justify-center">
-                  <div className="w-full h-full rounded-xl overflow-hidden border border-border/20 shadow-md">
-                    <img
-                      src={blog.thumbnail}
-                      alt=""
-                      className="w-full h-full object-cover object-center"
-                    />
-                  </div>
-                </div>
-              )}
 
               <div className="prose prose-lg dark:prose-invert max-w-none">
                 <DeltaRenderer contentStr={blog.content} />

@@ -25,9 +25,9 @@ export default function Skills() {
       className="relative w-full py-16 overflow-hidden bg-muted/20"
     >
       {/* Side Depth Mask Layers */}
-      <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-20 md:w-32 bg-linear-to-r from-background via-background/80 to-transparent" />
+      {/* <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-20 md:w-32 bg-linear-to-r from-background via-background/80 to-transparent" />
 
-      <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-20 md:w-32 bg-linear-to-l from-background via-background/80 to-transparent" />
+      <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-20 md:w-32 bg-linear-to-l from-background via-background/80 to-transparent" /> */}
 
       <div className="w-full px-4 sm:px-6 md:px-8 lg:px-12">
         {/* Header */}
@@ -60,9 +60,11 @@ export default function Skills() {
             grid-cols-4
             sm:grid-cols-4
             md:grid-cols-4
-            lg:grid-cols-6
+            lg:grid-cols-8
+            xl:grid-cols-10
+            2xl:grid-cols-15
             gap-4
-            md:gap-5
+            md:gap-4
             w-full
           "
         >

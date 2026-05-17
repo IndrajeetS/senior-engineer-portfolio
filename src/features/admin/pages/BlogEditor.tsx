@@ -44,6 +44,7 @@ import {
   Save,
   Strikethrough,
   Table as TableIcon,
+  Terminal,
   Undo,
   X,
 } from "lucide-react";
@@ -163,6 +164,13 @@ const MenuBar = ({ editor }: { editor: any }) => {
           >
             <Highlighter size={14} />
           </MenuButton>
+          <MenuButton
+            onClick={() => editor.chain().focus().toggleCode().run()}
+            active={editor.isActive("code")}
+            label="Inline Code (Ctrl+E)"
+          >
+            <Code size={14} />
+          </MenuButton>
         </div>
 
         {/* Alignment */}
@@ -257,7 +265,7 @@ const MenuBar = ({ editor }: { editor: any }) => {
             active={editor.isActive("codeBlock")}
             label="Code Block"
           >
-            <Code size={14} />
+            <Terminal size={14} />
           </MenuButton>
         </div>
 
@@ -542,7 +550,7 @@ export default function BlogEditor() {
     editorProps: {
       attributes: {
         class:
-          "prose prose-sm sm:prose lg:prose-lg xl:prose-xl dark:prose-invert m-5 focus:outline-none min-h-[500px] max-w-none",
+          "prose prose-sm sm:prose lg:prose-lg xl:prose-xl dark:prose-invert m-5 focus:outline-none min-h-[500px] max-w-none prose-code:before:content-none prose-code:after:content-none prose-code:bg-primary/10 prose-code:text-primary prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-pre:bg-muted/50 prose-pre:border prose-pre:border-border/60 prose-pre:p-4 prose-hr:border-border/80 prose-hr:my-8",
       },
     },
   });

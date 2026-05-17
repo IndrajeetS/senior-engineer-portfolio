@@ -1,6 +1,6 @@
+import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
 import { Briefcase, Calendar, ChevronRight } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 
 // Updated matching your resume profile records
 const experiences = [
@@ -84,7 +84,7 @@ const experiences = [
 export default function Experience() {
   if (!experiences) {
     return (
-      <section id="experience" className="py-24 bg-muted/20">
+      <section id="experience" className="py-24">
         <div className="container mx-auto px-4 md:px-8">
           <div className="h-10 w-48 bg-muted rounded mb-12 animate-pulse"></div>
           <div className="space-y-8 animate-pulse">
@@ -98,7 +98,7 @@ export default function Experience() {
   }
 
   return (
-    <section id="experience" className="py-24 bg-muted/20 relative">
+    <section id="experience" className="py-24 relative">
       <div className="container mx-auto px-4 md:px-8 max-w-5xl">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -126,7 +126,7 @@ export default function Experience() {
               {/* Timeline dot (Fixed alignment): 
                 Uses negative left positioning offsets to shift perfectly onto the left parent border axis.
               */}
-              <div className="absolute -left-[33px] md:-left-[51px] top-1.5 w-4 h-4 rounded-full bg-background border-4 border-primary group-hover:bg-primary transition-colors duration-300 z-10"></div>
+              <div className="absolute left-[-33px] md:left-[-51px] top-1.5 w-4 h-4 rounded-full bg-background border-4 border-primary group-hover:bg-primary transition-colors duration-300 z-10"></div>
 
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 mb-4">
                 <div>
