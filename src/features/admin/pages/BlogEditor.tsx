@@ -47,7 +47,7 @@ import {
   Undo,
   X,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { toast } from "sonner";
 import { useLocation, useRoute } from "wouter";
 import { adminApi } from "../api/admin.api";
@@ -88,24 +88,21 @@ const MenuButton = ({ onClick, disabled, active, label, children }: MenuButtonPr
 const MenuBar = ({ editor }: { editor: any }) => {
   if (!editor) return null;
 
-  const addImage = () => {
-    const url = window.prompt("Enter image URL");
-    if (url) {
-      editor.chain().focus().setImage({ src: url }).run();
-    }
+  const [linkModalOpen, setLinkModalOpen] = useState(false);
+  const [linkUrl, setLinkUrl] = useState("");
+  const [imageModalOpen, setImageModalOpen] = useState(false);
+  const [imageUrl, setImageUrl] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const openImageModal = () => {
+    setImageUrl("");
+    setImageModalOpen(true);
   };
 
-  const setLink = () => {
-    const previousUrl = editor.getAttributes("link").href;
-    const url = window.prompt("Enter URL", previousUrl);
-
-    if (url === null) return;
-    if (url === "") {
-      editor.chain().focus().extendMarkRange("link").unsetLink().run();
-      return;
-    }
-
-    editor.chain().focus().extendMarkRange("link").setLink({ href: url }).run();
+  const openLinkModal = () => {
+    const currentUrl = editor.getAttributes("link").href || "";
+    setLinkUrl(currentUrl);
+    setLinkModalOpen(true);
   };
 
   return (
@@ -271,6 +268,7 @@ const MenuBar = ({ editor }: { editor: any }) => {
               editor
                 .chain()
                 .focus()
+                .setParagraph() // 🛡️ Safeguard: Resets heading formatting so table insertion doesn't fail
                 .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
                 .run()
             }
@@ -314,14 +312,14 @@ const MenuBar = ({ editor }: { editor: any }) => {
         {/* Media & Others */}
         <div className="flex items-center gap-1">
           <MenuButton
-            onClick={setLink}
+            onClick={openLinkModal}
             active={editor.isActive("link")}
             label="Insert Link"
           >
             <LinkIcon size={14} />
           </MenuButton>
           <MenuButton
-            onClick={addImage}
+            onClick={openImageModal}
             label="Insert Image"
           >
             <ImageIcon size={14} />
@@ -342,6 +340,152 @@ const MenuBar = ({ editor }: { editor: any }) => {
           </MenuButton>
         </div>
       </div>
+
+      {/* 🔗 Insert Link Modal */}
+      {linkModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-card border border-border rounded-xl shadow-2xl p-6 w-full max-w-md mx-4 space-y-4 relative">
+            <button
+              type="button"
+              onClick={() => setLinkModalOpen(false)}
+              className="absolute top-4 right-4 text-muted-foreground hover:text-foreground"
+            >
+              <X size={18} />
+            </button>
+            <div className="space-y-2">
+              <h3 className="text-lg font-bold tracking-tight">Insert Hyperlink</h3>
+              <p className="text-xs text-muted-foreground">
+                Enter the web address you want to link to. Leave empty to clear link.
+              </p>
+            </div>
+            <Input
+              type="url"
+              placeholder="https://example.com"
+              value={linkUrl}
+              onChange={(e) => setLinkUrl(e.target.value)}
+              className="w-full"
+            />
+            <div className="flex justify-end gap-3 pt-2">
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => setLinkModalOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                onClick={() => {
+                  if (linkUrl) {
+                    editor.chain().focus().extendMarkRange("link").setLink({ href: linkUrl }).run();
+                  } else {
+                    editor.chain().focus().extendMarkRange("link").unsetLink().run();
+                  }
+                  setLinkModalOpen(false);
+                }}
+              >
+                Insert Link
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 🖼️ Insert Image Modal */}
+      {imageModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-card border border-border rounded-xl shadow-2xl p-6 w-full max-w-md mx-4 space-y-6 relative">
+            <button
+              type="button"
+              onClick={() => setImageModalOpen(false)}
+              className="absolute top-4 right-4 text-muted-foreground hover:text-foreground"
+            >
+              <X size={18} />
+            </button>
+            <div className="space-y-2">
+              <h3 className="text-lg font-bold tracking-tight">Insert Image</h3>
+              <p className="text-xs text-muted-foreground">
+                Upload a file directly from your device or reference an external web image URL.
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-xs font-mono font-bold text-muted-foreground">
+                  OPTION A: UPLOAD FROM DEVICE
+                </label>
+                <div
+                  onClick={() => fileInputRef.current?.click()}
+                  className="border-2 border-dashed border-border hover:border-primary/50 rounded-xl p-6 flex flex-col items-center justify-center cursor-pointer bg-muted/20 hover:bg-primary/5 transition-all group"
+                >
+                  <ImageIcon className="w-8 h-8 text-muted-foreground group-hover:text-primary transition-colors mb-2" />
+                  <span className="text-sm font-semibold">Choose image file</span>
+                  <span className="text-xs text-muted-foreground mt-1">PNG, JPG, WEBP, GIF (Embedded directly)</span>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    className="hidden"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onload = (readerEvent) => {
+                          const base64Url = readerEvent.target?.result as string;
+                          editor.chain().focus().setImage({ src: base64Url }).run();
+                          setImageModalOpen(false);
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div className="relative flex py-2 items-center">
+                <div className="flex-grow border-t border-border/60"></div>
+                <span className="flex-shrink mx-4 text-[10px] font-mono text-muted-foreground">OR</span>
+                <div className="flex-grow border-t border-border/60"></div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-mono font-bold text-muted-foreground">
+                  OPTION B: WEB IMAGE URL
+                </label>
+                <Input
+                  type="url"
+                  placeholder="https://example.com/image.png"
+                  value={imageUrl}
+                  onChange={(e) => setImageUrl(e.target.value)}
+                  className="w-full"
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 pt-2 border-t border-border/60">
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => setImageModalOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                disabled={!imageUrl}
+                onClick={() => {
+                  if (imageUrl) {
+                    editor.chain().focus().setImage({ src: imageUrl }).run();
+                    setImageModalOpen(false);
+                  }
+                }}
+              >
+                Add URL Image
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </TooltipProvider>
   );
 };
