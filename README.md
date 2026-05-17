@@ -167,14 +167,49 @@ The frontend interacts with a RESTful backend service. Below is a comprehensive 
 - **Headers:** `Authorization: Bearer <token>`
 - **Response:** Array of Enquiry objects.
 
-## 🔒 Security Enhancements
+## 🔒 Security & Admin Gateways
 
-- **Secure Storage:** Tokens are obfuscated via `crypto-js` to prevent plain-text exposure in browser developer tools and safeguard against basic tampering.
-- **Environment Management:** Sensitive URLs, social links, and API keys are externalized to a `.env` file, isolating configuration from the application code.
+To protect administrative screens from malicious brute-force scans and unwanted traffic, this portfolio utilizes a **Dynamic Gateway** and hidden access points:
+
+*   **Dynamic Custom Admin URL (`VITE_ADMIN_PATH`)**: Decouples the administrative dashboard from predictable paths (like `/admin`). Setting `VITE_ADMIN_PATH=/my-secret-portal` changes the entry-point to `/my-secret-portal/login`.
+*   **The Secret Keyboard Shortcut**: Pressing **`Cmd + Shift + L`** (macOS) or **`Ctrl + Shift + L`** (Windows/Linux) globally on any page instantly opens the custom Admin login portal.
+*   **The Footer Triple-Click Shortcut**: Clicking the copyright symbol (`©`) in the website footer **three times** in quick succession activates the secret admin gateway.
+*   **Secure Client Storage**: Session tokens (`auth_token`) are encrypted with AES (`crypto-js`) inside the browser’s local storage using `VITE_STORAGE_SECRET` to prevent simple XSS-based scraping or local inspection.
+
+---
+
+## ⚡ Netlify Production Deployment
+
+This application is fully optimized and **100% production-ready** for Netlify hosting.
+
+### 1. Direct SPA Routing (`_redirects`)
+Because this is a Single Page Application using clean HTML5 dynamic routing (`wouter`), a `_redirects` file is pre-configured in `/public` to rewrite all paths back to the index shell, ensuring that custom 404 pages and deep-nested admin routes function correctly when loaded directly:
+```text
+/* /index.html 200
+```
+
+### 2. Netlify Build & Site Configuration
+When creating your Netlify site, set the following configuration:
+*   **Repository**: Connect your GitHub repository.
+*   **Build Command**: `npm run build`
+*   **Publish Directory**: `dist`
+
+### 3. Required Environment Variables (Netlify Dashboard)
+Configure the following environment variables in your **Netlify Site Configuration > Environment Variables**:
+
+| Variable Name | Example Value | Description |
+| :--- | :--- | :--- |
+| `VITE_API_URL` | `https://api.yourdomain.com` | Base URL of your backend REST API. |
+| `VITE_ADMIN_PATH` | `/secret-portal` | Your secure, custom entry-point for the admin panel. |
+| `VITE_STORAGE_SECRET` | `your-high-entropy-key` | A secure string for encrypting local storage data. |
+| `VITE_SOCIAL_LINKEDIN` | `https://linkedin.com/in/...` | Your LinkedIn profile link. |
+| `VITE_SOCIAL_GITHUB` | `https://github.com/...` | Your GitHub profile link. |
+
+---
 
 ## 🔧 Getting Started
 
 1. Copy `.env.example` to `.env` and fill in the necessary variables (e.g. `VITE_API_URL`, `VITE_SOCIAL_LINKEDIN`).
 2. Run `npm install` to install dependencies.
 3. Run `npm run dev` to start the development server.
-4. Access the web app at `http://localhost:5173`.
+4. Access the web app at `http://localhost:3000`.

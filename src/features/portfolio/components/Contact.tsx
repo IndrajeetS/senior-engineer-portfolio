@@ -21,7 +21,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -34,38 +34,41 @@ export default function Contact() {
   const { data: profile } = useGetAbout();
   const submitMutation = useSubmitContact();
   const [isSuccess, setIsSuccess] = useState(false);
-  const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
       email: "",
-      subject: "",
+      // subject: "",
       message: "",
     },
   });
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     submitMutation.mutate(
-      { data: values },
+      values,
       {
         onSuccess: () => {
           setIsSuccess(true);
           form.reset();
-          toast({
-            title: "Message sent!",
-            description: "Thanks for reaching out. I'll get back to you soon.",
-          });
+          toast.success("Message sent! Thanks for reaching out. I'll get back to you soon.");
           setTimeout(() => setIsSuccess(false), 5000);
         },
-        onError: () => {
-          toast({
-            variant: "destructive",
-            title: "Error",
-            description:
-              "Something went wrong. Please try again or email me directly.",
-          });
+        onError: (err: any) => {
+          const statusCode = err.response?.data?.statusCode;
+          const errorMessage = err.response?.data?.error;
+
+          if (statusCode === 429) {
+            toast.error(errorMessage || "Too many requests. Please try again later.");
+            return;
+          }
+
+          toast.error(
+            errorMessage ||
+            err.response?.data?.message ||
+            "Something went wrong. Please try again."
+          );
         },
       },
     );
@@ -177,11 +180,12 @@ export default function Contact() {
                       name="name"
                       render={({ field }) => (
                         <FormItem>
-                          <Label className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
+                          <Label htmlFor="name" className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
                             Name
                           </Label>
                           <FormControl>
                             <Input
+                              id="name"
                               placeholder="John Doe"
                               {...field}
                               className="bg-muted/50 border-border h-12 focus-visible:ring-primary"
@@ -196,11 +200,12 @@ export default function Contact() {
                       name="email"
                       render={({ field }) => (
                         <FormItem>
-                          <Label className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
+                          <Label htmlFor="email" className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
                             Email
                           </Label>
                           <FormControl>
                             <Input
+                              id="email"
                               placeholder="john@example.com"
                               {...field}
                               className="bg-muted/50 border-border h-12 focus-visible:ring-primary"
@@ -214,39 +219,25 @@ export default function Contact() {
 
                   <FormField
                     control={form.control}
-                    name="subject"
-                    render={({ field }) => (
-                      <FormItem>
-                        <Label className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
-                          Subject
-                        </Label>
-                        <FormControl>
-                          <Input
-                            placeholder="Project Inquiry"
-                            {...field}
-                            className="bg-muted/50 border-border h-12 focus-visible:ring-primary"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
                     name="message"
                     render={({ field }) => (
-                      <FormItem>
-                        <Label className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
+                      <FormItem className="space-y-0">
+                        <Label
+                          htmlFor="message"
+                          className="font-mono text-xs uppercase tracking-wider text-muted-foreground"
+                        >
                           Message
                         </Label>
+
                         <FormControl>
                           <Textarea
+                            id="message"
                             placeholder="Hello, I'd like to talk about..."
                             className="bg-muted/50 border-border min-h-[150px] resize-none focus-visible:ring-primary"
                             {...field}
                           />
                         </FormControl>
+
                         <FormMessage />
                       </FormItem>
                     )}

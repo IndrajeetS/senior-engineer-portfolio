@@ -399,7 +399,7 @@ const MenuBar = ({ editor }: { editor: any }) => {
 };
 
 export default function BlogEditor() {
-  const [match, params] = useRoute<{ id: string }>("/admin/blogs/edit/:id");
+  const [match, params] = useRoute<{ id: string }>("/blogs/edit/:id");
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
   const blogId = match && params ? params.id : null;
@@ -501,7 +501,7 @@ export default function BlogEditor() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["blogs"] });
       toast.success(blogId ? "Blog updated" : "Blog published");
-      setLocation("/admin/blogs");
+      setLocation("/blogs");
     },
     onError: (err: any) => toast.error(err.message || "Failed to save blog"),
   });
@@ -535,7 +535,7 @@ export default function BlogEditor() {
           <Button
             variant="outline"
             size="icon"
-            onClick={() => setLocation("/admin/blogs")}
+            onClick={() => setLocation("/blogs")}
           >
             <ArrowLeft size={18} />
           </Button>
@@ -549,7 +549,7 @@ export default function BlogEditor() {
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <Button variant="ghost" onClick={() => setLocation("/admin/blogs")}>
+          <Button variant="ghost" onClick={() => setLocation("/blogs")}>
             Cancel
           </Button>
           <Button

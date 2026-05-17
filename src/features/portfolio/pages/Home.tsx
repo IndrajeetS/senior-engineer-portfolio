@@ -8,7 +8,6 @@ import Hero from "../components/Hero";
 import Projects from "../components/Projects";
 import Skills from "../components/Skills";
 import StatsBar from "../components/StatsBar";
-import Testimonials from "../components/Testimonials";
 
 export default function Home() {
   return (
@@ -24,7 +23,7 @@ export default function Home() {
       {/* 3. Professional Validation (Proof of Work) */}
       <Experience />
       <Projects />
-      <Testimonials />
+      {/* <Testimonials /> */}
 
       {/* 4. Secondary Background & Thought Leadership */}
       <Education />

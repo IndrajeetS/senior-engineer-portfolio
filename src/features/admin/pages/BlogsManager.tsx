@@ -53,7 +53,7 @@ export default function BlogsManager() {
           <h2 className="text-3xl font-bold tracking-tight">Blog Posts</h2>
           <p className="text-muted-foreground">Write and manage your articles.</p>
         </div>
-        <Link href="/admin/blogs/new">
+        <Link href="/blogs/new">
           <Button className="gap-2">
             <Plus size={18} /> New Post
           </Button>
@@ -100,7 +100,7 @@ export default function BlogsManager() {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
-                      <Link href={`/admin/blogs/edit/${blog.id || blog._id}`}>
+                      <Link href={`/blogs/edit/${blog.id || blog._id}`}>
                         <Button variant="ghost" size="icon">
                           <Pencil size={16} />
                         </Button>

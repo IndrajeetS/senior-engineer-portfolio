@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { ADMIN_BASE, ADMIN_LOGIN_PATH } from "@/constants/paths";
+import { ADMIN_LOGIN_PATH } from "@/constants/paths";
 import { useAdminLogout } from "@/features/admin/api/admin.api";
 import { secureStorage } from "@/utils/secureStorage";
 import {
@@ -22,8 +22,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   // 🛡️ Auth Guard: Kick out users without a valid token
   useEffect(() => {
     const token = secureStorage.getItem("auth_token");
-    if (!token && location !== ADMIN_LOGIN_PATH) {
-      setLocation("/");
+    if (!token) {
+      setLocation(`~${ADMIN_LOGIN_PATH}`);
     }
   }, [location, setLocation]);
 
@@ -33,21 +33,21 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     logout(undefined, {
       onSettled: () => {
         secureStorage.removeItem("auth_token");
-        setLocation(ADMIN_LOGIN_PATH);
+        setLocation(`~${ADMIN_LOGIN_PATH}`);
       }
     });
   };
 
   const navItems = [
-    { href: ADMIN_BASE, label: "Dashboard", icon: LayoutDashboard },
-    { href: `${ADMIN_BASE}/projects`, label: "Projects", icon: Briefcase },
-    { href: `${ADMIN_BASE}/techs`, label: "Technologies", icon: Wrench },
-    { href: `${ADMIN_BASE}/blogs`, label: "Blogs", icon: FileText },
-    { href: `${ADMIN_BASE}/info`, label: "Site Info", icon: Info },
-    { href: `${ADMIN_BASE}/enquiries`, label: "Enquiries", icon: Mail },
+    { href: "/", label: "Dashboard", icon: LayoutDashboard },
+    { href: "/projects", label: "Projects", icon: Briefcase },
+    { href: "/techs", label: "Technologies", icon: Wrench },
+    { href: "/blogs", label: "Blogs", icon: FileText },
+    { href: "/info", label: "Site Info", icon: Info },
+    { href: "/enquiries", label: "Enquiries", icon: Mail },
   ];
 
-  if (location === ADMIN_LOGIN_PATH) return <>{children}</>;
+  if (location === `~${ADMIN_LOGIN_PATH}`) return <>{children}</>;
 
   return (
     <div className="flex min-h-screen bg-background">

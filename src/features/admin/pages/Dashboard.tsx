@@ -32,7 +32,7 @@ export default function Dashboard() {
       icon: Briefcase,
       color: "text-blue-500",
       bg: "bg-blue-500",
-      href: "/admin/projects",
+      href: "/projects",
     },
     {
       label: "Tech Stack",
@@ -40,7 +40,7 @@ export default function Dashboard() {
       icon: Wrench,
       color: "text-orange-500",
       bg: "bg-orange-500",
-      href: "/admin/techs",
+      href: "/techs",
     },
     {
       label: "Blog Posts",
@@ -48,7 +48,7 @@ export default function Dashboard() {
       icon: FileText,
       color: "text-green-500",
       bg: "bg-green-500",
-      href: "/admin/blogs",
+      href: "/blogs",
     },
     {
       label: "Enquiries",
@@ -56,7 +56,7 @@ export default function Dashboard() {
       icon: Mail,
       color: "text-purple-500",
       bg: "bg-purple-500",
-      href: "/admin/enquiries",
+      href: "/enquiries",
     },
   ];
 

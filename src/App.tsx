@@ -1,15 +1,33 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { lazy, Suspense } from "react";
 import { Provider as ReduxProvider } from "react-redux";
 import { Toaster } from "sonner";
 import { Route, Switch, Router as WouterRouter } from "wouter";
 
 import { TooltipProvider } from "./components/ui/tooltip";
-import BlogDetail from "./features/blog/pages/BlogDetails";
-import Home from "./features/portfolio/pages/Home";
-import NotFound from "./features/portfolio/pages/not-found";
+import { ADMIN_BASE, ADMIN_LOGIN_PATH } from "./constants/paths";
 import { ThemeProvider } from "./providers/theme-provider";
 import { store } from "./store";
 
+// 1. Static Import for Critical Initial Views (Keep home page fast & immediate)
+import Home from "./features/portfolio/pages/Home";
+import NotFound from "./features/portfolio/pages/not-found";
+
+// 2. Lazy Load Public but Deeper Sub-pages
+const BlogDetail = lazy(() => import("./features/blog/pages/BlogDetails"));
+
+// 3. Lazy Load Heavy Admin Sub-ecosystem
+const AdminLayout = lazy(() => import("./features/admin/components/AdminLayout"));
+const AdminDashboard = lazy(() => import("./features/admin/pages/Dashboard"));
+const ProjectsManager = lazy(() => import("./features/admin/pages/ProjectsManager"));
+const TechsManager = lazy(() => import("./features/admin/pages/TechsManager"));
+const BlogsManager = lazy(() => import("./features/admin/pages/BlogsManager"));
+const BlogEditor = lazy(() => import("./features/admin/pages/BlogEditor"));
+const InfoManager = lazy(() => import("./features/admin/pages/InfoManager"));
+const EnquiriesManager = lazy(() => import("./features/admin/pages/Enquiries"));
+const AdminLogin = lazy(() => import("./features/admin/pages/Login"));
+
+// Instantiate outside the component to prevent re-creation on re-renders
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -19,53 +37,52 @@ const queryClient = new QueryClient({
   },
 });
 
-import AdminLayout from "./features/admin/components/AdminLayout";
-import BlogsManager from "./features/admin/pages/BlogsManager";
-import BlogEditor from "./features/admin/pages/BlogEditor";
-import AdminDashboard from "./features/admin/pages/Dashboard";
-import EnquiriesManager from "./features/admin/pages/Enquiries";
-import InfoManager from "./features/admin/pages/InfoManager";
-import AdminLogin from "./features/admin/pages/Login";
-import ProjectsManager from "./features/admin/pages/ProjectsManager";
-import TechsManager from "./features/admin/pages/TechsManager";
-import { ADMIN_BASE, ADMIN_LOGIN_PATH } from "./constants/paths";
+// A clean loading skeleton or spinner for fallback states
+const PageLoader = () => (
+  <div className="flex h-screen w-screen items-center justify-center bg-background">
+    <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+  </div>
+);
+
+// Encapsulating admin nested routing rules to persist the layout container shell
+function AdminSubRouter() {
+  return (
+    <AdminLayout>
+      <Suspense fallback={<PageLoader />}>
+        <Switch>
+          <Route path="/" component={AdminDashboard} />
+          <Route path="/projects" component={ProjectsManager} />
+          <Route path="/techs" component={TechsManager} />
+          <Route path="/blogs" component={BlogsManager} />
+          <Route path="/blogs/new" component={BlogEditor} />
+          <Route path="/blogs/edit/:id" component={BlogEditor} />
+          <Route path="/info" component={InfoManager} />
+          <Route path="/enquiries" component={EnquiriesManager} />
+          <Route component={NotFound} />
+        </Switch>
+      </Suspense>
+    </AdminLayout>
+  );
+}
 
 function Router() {
   return (
-    <Switch>
-      <Route path="/" component={Home} />
-      <Route path="/blog/:id" component={BlogDetail} />
+    <Suspense fallback={<PageLoader />}>
+      <Switch>
+        {/* Core Portfolio Public Routes */}
+        <Route path="/" component={Home} />
+        <Route path="/blog/:id" component={BlogDetail} />
 
-      {/* Admin Routes */}
-      <Route path={ADMIN_LOGIN_PATH} component={AdminLogin} />
-      
-      <Route path={ADMIN_BASE}>
-        <AdminLayout><AdminDashboard /></AdminLayout>
-      </Route>
-      <Route path={`${ADMIN_BASE}/projects`}>
-        <AdminLayout><ProjectsManager /></AdminLayout>
-      </Route>
-      <Route path={`${ADMIN_BASE}/techs`}>
-        <AdminLayout><TechsManager /></AdminLayout>
-      </Route>
-      <Route path={`${ADMIN_BASE}/blogs`}>
-        <AdminLayout><BlogsManager /></AdminLayout>
-      </Route>
-      <Route path={`${ADMIN_BASE}/blogs/new`}>
-        <AdminLayout><BlogEditor /></AdminLayout>
-      </Route>
-      <Route path={`${ADMIN_BASE}/blogs/edit/:id`}>
-        <AdminLayout><BlogEditor /></AdminLayout>
-      </Route>
-      <Route path={`${ADMIN_BASE}/info`}>
-        <AdminLayout><InfoManager /></AdminLayout>
-      </Route>
-      <Route path={`${ADMIN_BASE}/enquiries`}>
-        <AdminLayout><EnquiriesManager /></AdminLayout>
-      </Route>
+        {/* Admin Public Gateway */}
+        <Route path={ADMIN_LOGIN_PATH} component={AdminLogin} />
 
-      <Route component={NotFound} />
-    </Switch>
+        {/* Unified Admin Management Wrapper (Matches both exact and nested Admin Base paths) */}
+        <Route path={ADMIN_BASE} nest component={AdminSubRouter} />
+
+        {/* Global Fallback Catch-all Route */}
+        <Route component={NotFound} />
+      </Switch>
+    </Suspense>
   );
 }
 
@@ -75,9 +92,7 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <TooltipProvider>
-            <WouterRouter
-              base={import.meta.env.BASE_URL?.replace(/\/$/, "") || ""}
-            >
+            <WouterRouter base={import.meta.env.BASE_URL?.replace(/\/$/, "") || ""}>
               <div className="min-h-screen bg-background font-sans antialiased">
                 <Router />
               </div>
