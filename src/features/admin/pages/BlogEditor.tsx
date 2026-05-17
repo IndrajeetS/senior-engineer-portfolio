@@ -51,6 +51,39 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useLocation, useRoute } from "wouter";
 import { adminApi } from "../api/admin.api";
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
+
+interface MenuButtonProps {
+  onClick: () => void;
+  disabled?: boolean;
+  active?: boolean;
+  label: string;
+  children: React.ReactNode;
+}
+
+const MenuButton = ({ onClick, disabled, active, label, children }: MenuButtonProps) => {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          onClick={onClick}
+          disabled={disabled}
+          className={`h-8 w-8 hover:bg-primary/10 hover:text-primary transition-all duration-200 ${
+            active ? "bg-primary/10 text-primary font-bold border border-primary/20" : "text-muted-foreground"
+          }`}
+        >
+          {children}
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent side="top" className="bg-popover text-popover-foreground border shadow-md font-mono text-[10px]">
+        {label}
+      </TooltipContent>
+    </Tooltip>
+  );
+};
 
 const MenuBar = ({ editor }: { editor: any }) => {
   if (!editor) return null;
@@ -76,325 +109,240 @@ const MenuBar = ({ editor }: { editor: any }) => {
   };
 
   return (
-    <div className="flex flex-wrap gap-1 p-2 border-b bg-muted/30 sticky top-0 z-10">
-      {/* History */}
-      <div className="flex items-center gap-1 pr-1 border-r mr-1">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => editor.chain().focus().undo().run()}
-          disabled={!editor.can().undo()}
-        >
-          <Undo size={14} />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => editor.chain().focus().redo().run()}
-          disabled={!editor.can().redo()}
-        >
-          <Redo size={14} />
-        </Button>
-      </div>
+    <TooltipProvider>
+      <div className="flex flex-wrap gap-1 p-2 border-b bg-muted/30 sticky top-0 z-10">
+        {/* History */}
+        <div className="flex items-center gap-1 pr-1 border-r mr-1">
+          <MenuButton
+            onClick={() => editor.chain().focus().undo().run()}
+            disabled={!editor.can().undo()}
+            label="Undo (Ctrl+Z)"
+          >
+            <Undo size={14} />
+          </MenuButton>
+          <MenuButton
+            onClick={() => editor.chain().focus().redo().run()}
+            disabled={!editor.can().redo()}
+            label="Redo (Ctrl+Y)"
+          >
+            <Redo size={14} />
+          </MenuButton>
+        </div>
 
-      {/* Formatting */}
-      <div className="flex items-center gap-1 pr-1 border-r mr-1">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => editor.chain().focus().toggleBold().run()}
-          className={
-            editor.isActive("bold") ? "bg-accent text-accent-foreground" : ""
-          }
-        >
-          <Bold size={14} />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => editor.chain().focus().toggleItalic().run()}
-          className={
-            editor.isActive("italic") ? "bg-accent text-accent-foreground" : ""
-          }
-        >
-          <Italic size={14} />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => editor.chain().focus().toggleUnderline().run()}
-          className={
-            editor.isActive("underline")
-              ? "bg-accent text-accent-foreground"
-              : ""
-          }
-        >
-          <div className="underline text-xs font-bold">U</div>
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => editor.chain().focus().toggleStrike().run()}
-          className={
-            editor.isActive("strike") ? "bg-accent text-accent-foreground" : ""
-          }
-        >
-          <Strikethrough size={14} />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => editor.chain().focus().toggleHighlight().run()}
-          className={
-            editor.isActive("highlight")
-              ? "bg-accent text-accent-foreground"
-              : ""
-          }
-        >
-          <Highlighter size={14} />
-        </Button>
-      </div>
+        {/* Formatting */}
+        <div className="flex items-center gap-1 pr-1 border-r mr-1">
+          <MenuButton
+            onClick={() => editor.chain().focus().toggleBold().run()}
+            active={editor.isActive("bold")}
+            label="Bold (Ctrl+B)"
+          >
+            <Bold size={14} />
+          </MenuButton>
+          <MenuButton
+            onClick={() => editor.chain().focus().toggleItalic().run()}
+            active={editor.isActive("italic")}
+            label="Italic (Ctrl+I)"
+          >
+            <Italic size={14} />
+          </MenuButton>
+          <MenuButton
+            onClick={() => editor.chain().focus().toggleUnderline().run()}
+            active={editor.isActive("underline")}
+            label="Underline (Ctrl+U)"
+          >
+            <div className="underline text-xs font-bold leading-none">U</div>
+          </MenuButton>
+          <MenuButton
+            onClick={() => editor.chain().focus().toggleStrike().run()}
+            active={editor.isActive("strike")}
+            label="Strikethrough"
+          >
+            <Strikethrough size={14} />
+          </MenuButton>
+          <MenuButton
+            onClick={() => editor.chain().focus().toggleHighlight().run()}
+            active={editor.isActive("highlight")}
+            label="Highlight Text"
+          >
+            <Highlighter size={14} />
+          </MenuButton>
+        </div>
 
-      {/* Alignment */}
-      <div className="flex items-center gap-1 pr-1 border-r mr-1">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => editor.chain().focus().setTextAlign("left").run()}
-          className={
-            editor.isActive({ textAlign: "left" })
-              ? "bg-accent text-accent-foreground"
-              : ""
-          }
-        >
-          <AlignLeft size={14} />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => editor.chain().focus().setTextAlign("center").run()}
-          className={
-            editor.isActive({ textAlign: "center" })
-              ? "bg-accent text-accent-foreground"
-              : ""
-          }
-        >
-          <AlignCenter size={14} />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => editor.chain().focus().setTextAlign("right").run()}
-          className={
-            editor.isActive({ textAlign: "right" })
-              ? "bg-accent text-accent-foreground"
-              : ""
-          }
-        >
-          <AlignRight size={14} />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => editor.chain().focus().setTextAlign("justify").run()}
-          className={
-            editor.isActive({ textAlign: "justify" })
-              ? "bg-accent text-accent-foreground"
-              : ""
-          }
-        >
-          <AlignJustify size={14} />
-        </Button>
-      </div>
+        {/* Alignment */}
+        <div className="flex items-center gap-1 pr-1 border-r mr-1">
+          <MenuButton
+            onClick={() => editor.chain().focus().setTextAlign("left").run()}
+            active={editor.isActive({ textAlign: "left" })}
+            label="Align Left"
+          >
+            <AlignLeft size={14} />
+          </MenuButton>
+          <MenuButton
+            onClick={() => editor.chain().focus().setTextAlign("center").run()}
+            active={editor.isActive({ textAlign: "center" })}
+            label="Align Center"
+          >
+            <AlignCenter size={14} />
+          </MenuButton>
+          <MenuButton
+            onClick={() => editor.chain().focus().setTextAlign("right").run()}
+            active={editor.isActive({ textAlign: "right" })}
+            label="Align Right"
+          >
+            <AlignRight size={14} />
+          </MenuButton>
+          <MenuButton
+            onClick={() => editor.chain().focus().setTextAlign("justify").run()}
+            active={editor.isActive({ textAlign: "justify" })}
+            label="Align Justify"
+          >
+            <AlignJustify size={14} />
+          </MenuButton>
+        </div>
 
-      {/* Headings */}
-      <div className="flex items-center gap-1 pr-1 border-r mr-1">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() =>
-            editor.chain().focus().toggleHeading({ level: 1 }).run()
-          }
-          className={
-            editor.isActive("heading", { level: 1 })
-              ? "bg-accent text-accent-foreground"
-              : ""
-          }
-        >
-          <Heading1 size={14} />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() =>
-            editor.chain().focus().toggleHeading({ level: 2 }).run()
-          }
-          className={
-            editor.isActive("heading", { level: 2 })
-              ? "bg-accent text-accent-foreground"
-              : ""
-          }
-        >
-          <Heading2 size={14} />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() =>
-            editor.chain().focus().toggleHeading({ level: 3 }).run()
-          }
-          className={
-            editor.isActive("heading", { level: 3 })
-              ? "bg-accent text-accent-foreground"
-              : ""
-          }
-        >
-          <Heading3 size={14} />
-        </Button>
-      </div>
+        {/* Headings */}
+        <div className="flex items-center gap-1 pr-1 border-r mr-1">
+          <MenuButton
+            onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+            active={editor.isActive("heading", { level: 1 })}
+            label="Heading 1"
+          >
+            <Heading1 size={14} />
+          </MenuButton>
+          <MenuButton
+            onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+            active={editor.isActive("heading", { level: 2 })}
+            label="Heading 2"
+          >
+            <Heading2 size={14} />
+          </MenuButton>
+          <MenuButton
+            onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+            active={editor.isActive("heading", { level: 3 })}
+            label="Heading 3"
+          >
+            <Heading3 size={14} />
+          </MenuButton>
+        </div>
 
-      {/* Lists & Blocks */}
-      <div className="flex items-center gap-1 pr-1 border-r mr-1">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => editor.chain().focus().toggleBulletList().run()}
-          className={
-            editor.isActive("bulletList")
-              ? "bg-accent text-accent-foreground"
-              : ""
-          }
-        >
-          <List size={14} />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => editor.chain().focus().toggleOrderedList().run()}
-          className={
-            editor.isActive("orderedList")
-              ? "bg-accent text-accent-foreground"
-              : ""
-          }
-        >
-          <ListOrdered size={14} />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => editor.chain().focus().toggleTaskList().run()}
-          className={
-            editor.isActive("taskList")
-              ? "bg-accent text-accent-foreground"
-              : ""
-          }
-        >
-          <CheckSquare size={14} />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => editor.chain().focus().toggleBlockquote().run()}
-          className={
-            editor.isActive("blockquote")
-              ? "bg-accent text-accent-foreground"
-              : ""
-          }
-        >
-          <Quote size={14} />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => editor.chain().focus().toggleCodeBlock().run()}
-          className={
-            editor.isActive("codeBlock")
-              ? "bg-accent text-accent-foreground"
-              : ""
-          }
-        >
-          <Code size={14} />
-        </Button>
-      </div>
+        {/* Lists & Blocks */}
+        <div className="flex items-center gap-1 pr-1 border-r mr-1">
+          <MenuButton
+            onClick={() => editor.chain().focus().toggleBulletList().run()}
+            active={editor.isActive("bulletList")}
+            label="Bullet List"
+          >
+            <List size={14} />
+          </MenuButton>
+          <MenuButton
+            onClick={() => editor.chain().focus().toggleOrderedList().run()}
+            active={editor.isActive("orderedList")}
+            label="Numbered List"
+          >
+            <ListOrdered size={14} />
+          </MenuButton>
+          <MenuButton
+            onClick={() => editor.chain().focus().toggleTaskList().run()}
+            active={editor.isActive("taskList")}
+            label="Task List"
+          >
+            <CheckSquare size={14} />
+          </MenuButton>
+          <MenuButton
+            onClick={() => editor.chain().focus().toggleBlockquote().run()}
+            active={editor.isActive("blockquote")}
+            label="Quote"
+          >
+            <Quote size={14} />
+          </MenuButton>
+          <MenuButton
+            onClick={() => editor.chain().focus().toggleCodeBlock().run()}
+            active={editor.isActive("codeBlock")}
+            label="Code Block"
+          >
+            <Code size={14} />
+          </MenuButton>
+        </div>
 
-      {/* Tables */}
-      <div className="flex items-center gap-1 pr-1 border-r mr-1">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() =>
-            editor
-              .chain()
-              .focus()
-              .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
-              .run()
-          }
-        >
-          <TableIcon size={14} />
-        </Button>
-        {editor.isActive("table") && (
-          <>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => editor.chain().focus().addColumnAfter().run()}
-              className="px-1 text-[10px]"
-            >
-              Add Col
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => editor.chain().focus().addRowAfter().run()}
-              className="px-1 text-[10px]"
-            >
-              Add Row
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => editor.chain().focus().deleteTable().run()}
-              className="px-1 text-[10px] text-destructive"
-            >
-              Del Table
-            </Button>
-          </>
-        )}
-      </div>
+        {/* Tables */}
+        <div className="flex items-center gap-1 pr-1 border-r mr-1">
+          <MenuButton
+            onClick={() =>
+              editor
+                .chain()
+                .focus()
+                .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
+                .run()
+            }
+            label="Insert Table"
+          >
+            <TableIcon size={14} />
+          </MenuButton>
+          {editor.isActive("table") && (
+            <>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => editor.chain().focus().addColumnAfter().run()}
+                className="px-1.5 h-8 text-[10px] hover:bg-primary/10 hover:text-primary transition-colors"
+              >
+                Add Col
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => editor.chain().focus().addRowAfter().run()}
+                className="px-1.5 h-8 text-[10px] hover:bg-primary/10 hover:text-primary transition-colors"
+              >
+                Add Row
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => editor.chain().focus().deleteTable().run()}
+                className="px-1.5 h-8 text-[10px] text-destructive hover:bg-destructive/10 transition-colors"
+              >
+                Del Table
+              </Button>
+            </>
+          )}
+        </div>
 
-      {/* Media & Others */}
-      <div className="flex items-center gap-1">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={setLink}
-          className={
-            editor.isActive("link") ? "bg-accent text-accent-foreground" : ""
-          }
-        >
-          <LinkIcon size={14} />
-        </Button>
-        <Button variant="ghost" size="icon" onClick={addImage}>
-          <ImageIcon size={14} />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => editor.chain().focus().setHorizontalRule().run()}
-        >
-          <Minus size={14} />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() =>
-            editor.chain().focus().unsetAllMarks().clearNodes().run()
-          }
-        >
-          <RotateCcw size={14} />
-        </Button>
+        {/* Media & Others */}
+        <div className="flex items-center gap-1">
+          <MenuButton
+            onClick={setLink}
+            active={editor.isActive("link")}
+            label="Insert Link"
+          >
+            <LinkIcon size={14} />
+          </MenuButton>
+          <MenuButton
+            onClick={addImage}
+            label="Insert Image"
+          >
+            <ImageIcon size={14} />
+          </MenuButton>
+          <MenuButton
+            onClick={() => editor.chain().focus().setHorizontalRule().run()}
+            label="Horizontal Line"
+          >
+            <Minus size={14} />
+          </MenuButton>
+          <MenuButton
+            onClick={() =>
+              editor.chain().focus().unsetAllMarks().clearNodes().run()
+            }
+            label="Clear Formatting"
+          >
+            <RotateCcw size={14} />
+          </MenuButton>
+        </div>
       </div>
-    </div>
+    </TooltipProvider>
   );
 };
 
